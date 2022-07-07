@@ -3,7 +3,7 @@ package com.enelx.shortner.model
 import io.circe.{Decoder, Encoder}
 import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
 
-case class ShortUrl(shortUrl:Option[String], destination:String)
+case class ShortUrl(shortUrl:String, destination:String)
 
 object ShortUrl {
 

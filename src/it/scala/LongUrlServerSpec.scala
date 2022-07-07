@@ -58,7 +58,7 @@ class LongUrlServerSpec extends AnyFunSuite with Matchers with BeforeAndAfterAll
 
   test("a Get request for a existing short url result in a 301") {
     val first = createShortUrl("http://www.google.com/test")
-    val request = Request[IO](method = Method.GET, uri = Uri.unsafeFromString(first.shortUrl.get))
+    val request = Request[IO](method = Method.GET, uri = Uri.unsafeFromString(first.shortUrl))
     val response = client.flatMap(x => x.run(request))
     response.use(r => IO.pure(r.status)).unsafeRunSync() shouldBe Status.MovedPermanently
     response.use(r => IO.pure(r.headers.get[Location].get.uri.toString())).unsafeRunSync() shouldBe "http://www.google.com/test"

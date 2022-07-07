@@ -2,16 +2,17 @@ package com.enelx.shortner
 
 import cats.effect.{ExitCode, IO, IOApp}
 import com.enelx.shortner.service.ShortnerUrlService
+import org.http4s.Uri
 import org.http4s.blaze.server.BlazeServerBuilder
 import org.http4s.implicits.http4sKleisliResponseSyntaxOptionT
 
-import scala.concurrent.ExecutionContext
 
 object ServerApp extends IOApp {
   val serverPort = 8080
   println("Server start: http://localhost:8080")
+  val urlService = new ShortnerUrlService(Uri.unsafeFromString("http://localhost:8080"))
   val app = (
-    ShortnerUrlService.routes
+    urlService.routes
     ).orNotFound
 
   val server = BlazeServerBuilder[IO]

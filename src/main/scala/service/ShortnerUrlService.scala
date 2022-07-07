@@ -3,15 +3,14 @@ package com.enelx.shortner.service
 import cats.effect.IO
 import com.enelx.shortner.model.{LongUrl, ShortUrl}
 import com.enelx.shortner.repository.UrlRepository
-import io.circe.syntax.EncoderOps
 import org.http4s.circe.CirceEntityCodec.circeEntityEncoder
 import org.http4s.circe._
 import org.http4s.dsl.Http4sDsl
 import org.http4s.headers.{Host, Location}
 import org.http4s.{HttpRoutes, Response, Uri}
 
-object ShortnerUrlService extends Http4sDsl[IO]
-{
+// eventually configurable with the domain of the url shortner service ex. https://shortIt.com
+final class ShortnerUrlService(domain: Uri) extends Http4sDsl[IO] {
 
 
   val routes = HttpRoutes.of[IO] {
@@ -22,16 +21,13 @@ object ShortnerUrlService extends Http4sDsl[IO]
         response <- urlResult(getResult)
       } yield response
 
-    case req @ POST -> Root / "shorten" =>
+    case req@POST -> Root / "shorten" =>
       for {
         longUrl <- req.decodeJson[LongUrl]
         internalUrlId <- UrlRepository.storeShortUrl(longUrl.destination.toString)
         externalId = GenerateShortUrlId.getShortUrlsExternalId(internalUrlId)
-        optionHost = req.headers.get[Host]
-        response <- Created(ShortUrl(optionHost.map(h =>s"http://${h.host}:${h.port.getOrElse(80)}/${externalId}") , longUrl.destination.toString))
+        response <- Created(ShortUrl((domain / externalId).toString(), longUrl.destination.toString))
       } yield response
-
-
 
 
   }
